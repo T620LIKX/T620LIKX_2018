@@ -1,0 +1,7 @@
+
+glpsol --math -m stundatafla.mod -d stundatafla_test1.dat --check --wlp stundatafla.lp
+gurobi_cl ResultFile=stundatafla.sol stundatafla.lp
+
+glpsol --math -m proftafla.mod -d proftafla_test1.dat --check --wlp proftafla.lp
+gurobi_cl ResultFile=proftafla.sol proftafla.lp
+
