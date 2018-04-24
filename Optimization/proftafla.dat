@@ -1,4 +1,4 @@
-param T := 2;
+param T := 20;
 param C := 4;
 param S := 2;
 param P := 5;
@@ -7,7 +7,7 @@ param Courses :=
 1 2 3
 1 3 2
 1 4 1
-2 3 1 
+2 3 1
 2 4 1
 3 4 0
 2 1 3
@@ -18,12 +18,12 @@ param Courses :=
 4 3 0
 ;
 
-set FixedCourses := 
+set FixedCourses :=
 1 1
 ;
 
-set NotAllowed := 
-3 1 
+set NotAllowed :=
+3 1
 ;
 
 end;
