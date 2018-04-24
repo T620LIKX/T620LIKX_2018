@@ -28,6 +28,7 @@ create table courses (
     computer_exam boolean,
     startdate date,
     enddate date,
+    problem_solving_lesson boolean,
     primary key (id)
 );
 
