@@ -1,5 +1,18 @@
+/.DS_Store
 .DS_Store
 */.DS_Store
+
+Optimization/stundatafla_test1.dat
+Optimization/stundatafla.lp
+Optimization/stundatafla.sol
+
+Optimization/proftafla_test1.dat
+Optimization/proftafla.lp
+Optimization/proftafla.sol
+
+Optimization/gurobi.log
+Optimization/*.pickle
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

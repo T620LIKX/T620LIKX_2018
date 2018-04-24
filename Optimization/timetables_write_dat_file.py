@@ -22,10 +22,13 @@ def calculate_conflict_penalty(c):
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
-select_course_ids = """select id
-from courses
+select_course_ids = """select c.id, count(e.student_id)
+from courses c, enrollment e
 where semester_type = {} and department_id = {}
-order by id;"""
+and c.id = e.course_id
+group by c.id
+order by c.id;"""
+
 
 select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id)
 from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id as course2
@@ -38,6 +41,8 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and c1.department_id = {} and c2.department_id = {}) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
+
+
 
 cursor.execute( select_course_ids.format(20171,4))
 thecoursedata = cursor.fetchall()
@@ -65,9 +70,16 @@ for i in thedata:
 
 
 #FASTAR
+
 T = 16
 C = len(thecoursedata)
-S = 100
+S = 55
+
+Course100Limit = 2
+Course80Limit = 8
+Course60Limit = 14
+
+
 
 f = open('stundatafla_test1.dat','w')
 
@@ -87,6 +99,36 @@ for i in range(C):
     for j in range(T):
         f.write('{} {} 0\n'.format(i+1,j+1))
 f.write(';\n')
+
+
+f.write('set LargeCourse100 :=\n')
+counter = 1
+for i in thecoursedata:
+    if i[1] >= 100:
+        f.write('{}\n'.format(counter))
+    counter = counter + 1
+f.write(';\n')
+
+f.write('set LargeCourse80 :=\n')
+counter = 1
+for i in thecoursedata:
+    if i[1] >= 80:
+        f.write('{}\n'.format(counter))
+    counter = counter + 1
+f.write(';\n')
+
+f.write('set LargeCourse60 :=\n')
+counter = 1
+for i in thecoursedata:
+    if i[1] >= 60:
+        f.write('{}\n'.format(counter))
+    counter = counter + 1
+f.write(';\n')
+
+f.write('param Course100Limit := {};\n'.format(Course100Limit));
+f.write('param Course80Limit := {};\n'.format(Course80Limit));
+f.write('param Course60Limit := {};\n'.format(Course60Limit));
+
 
 f.write('end;\n')
 
