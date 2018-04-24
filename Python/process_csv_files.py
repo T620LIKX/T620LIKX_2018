@@ -74,7 +74,7 @@ for i in course_data:
 
         semester_type = helper_functions.get_semester_type(course_start, course_ends)
 
-        courses[i['Course_Id']] = {'id': counter, 'course_code': i['Course_Code'], 'course_id': i['Course_Id'], 'course_name': i['Course_Name'], 'semester': i['Semester'], 'semester_type': semester_type, 'department': i['Course_Department'], 'department_id': department_id, 'start': course_start, 'end': course_ends, 'lectures_per_week': 0, 'final_exam': False, 'exam_length': 180, 'computer_exam': False}
+        courses[i['Course_Id']] = {'id': counter, 'course_code': i['Course_Code'], 'course_id': i['Course_Id'], 'course_name': i['Course_Name'], 'semester': i['Semester'], 'semester_type': semester_type, 'department': i['Course_Department'], 'department_id': department_id, 'start': course_start, 'end': course_ends, 'lectures_per_week': 0, 'final_exam': False, 'exam_length': 180, 'computer_exam': False, 'problem_solving_lesson': False}
         counter = counter + 1
 
 #----------- Process the enrollment --------------------------
@@ -98,6 +98,8 @@ for i in booking_data:
             courses[i['sis_Course_Id']]['lectures_per_week'] = helper_functions.calculate_lectures_per_week(semester_type, int(i['Count']))
         elif i['BookingType'] == 'Lokapróf':
             courses[i['sis_Course_Id']]['final_exam'] = True
+        elif i['BookingType'] == 'Dæmatímar':
+            courses[i['sis_Course_Id']]['problem_solving_lesson'] = True
 
 
 #------------ Prepare the SQL insert statements --------------------------
@@ -105,7 +107,7 @@ for i in booking_data:
 departments_insert = "insert into departments (id, department_name) values({},'{}');"
 nemendur_insert = "insert into students(id, student_no, department_id) values({},'{}',{});"
 rooms_insert = "insert into rooms(id, name, seats, description, exam_seats) values({},'{}',{},'{}',{});"
-courses_insert = "insert into courses(id, course_code, course_id, course_name, department_id, semester, lectures_per_week, startdate, enddate, semester_type, final_exam, exam_length, computer_exam) values({},'{}','{}','{}',{}, {}, {}, '{}', '{}', {}, {},{},{});"
+courses_insert = "insert into courses(id, course_code, course_id, course_name, department_id, semester, lectures_per_week, startdate, enddate, semester_type, final_exam, exam_length, computer_exam, problem_solving_lesson) values({},'{}','{}','{}',{}, {}, {}, '{}', '{}', {}, {},{},{}, {});"
 enrollment_insert = "insert into enrollment (student_id, course_id) values({},{});"
 
 
@@ -126,7 +128,7 @@ if write_sql_insert_statements_to_file:
         f.write('\n')
 
     for k,v in courses.items():
-        f.write(courses_insert.format(v['id'], v['course_code'], v['course_id'], v['course_name'], v['department_id'], v['semester'], v['lectures_per_week'], v['start'], v['end'], v['semester_type'], v['final_exam'], v['exam_length'], v['computer_exam']))
+        f.write(courses_insert.format(v['id'], v['course_code'], v['course_id'], v['course_name'], v['department_id'], v['semester'], v['lectures_per_week'], v['start'], v['end'], v['semester_type'], v['final_exam'], v['exam_length'], v['computer_exam'], v['problem_solving_lesson']))
         f.write('\n')
 
     for e in enrollment:
@@ -148,7 +150,7 @@ if insert_directly_into_database:
         cursor.execute(rooms_insert.format(v['id'], v['room'], v['seats'], v['description'], v['exam_seats']))
 
     for k,v in courses.items():
-        cursor.execute(courses_insert.format(v['id'], v['course_code'], v['course_id'], v['course_name'], v['department_id'], v['semester'], v['lectures_per_week'], v['start'], v['end'], v['semester_type'], v['final_exam'], v['exam_length'], v['computer_exam']))
+        cursor.execute(courses_insert.format(v['id'], v['course_code'], v['course_id'], v['course_name'], v['department_id'], v['semester'], v['lectures_per_week'], v['start'], v['end'], v['semester_type'], v['final_exam'], v['exam_length'], v['computer_exam'], v['problem_solving_lesson']))
 
     for e in enrollment:
         cursor.execute(enrollment_insert.format(e[0], e[1]))
