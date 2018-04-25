@@ -4,6 +4,8 @@ param C >= 0 integer; #Courses
 param T >= 0 integer; #Time periods
 param S >= 0 integer; #Classrooms
 param P >= 0 integer; #refsing
+param N >= 0 integer; #Hámarksfjöldi nemenda fyrir hvert timabil
+param FjoldiNemenda {c in 1..C};
 
 set FixedCourses within {c in 1..C, t in 1..T};
 set NotAllowed within {c in 1..C, t in 1..T};
@@ -50,5 +52,7 @@ s.t. NotAllow{ (c,t) in NotAllowed }: x[c,t]=1;
 s.t. FixCourse{ (c,t) in FixedCourses }: x[c,t]=1;
 
 s.t. ClassR{t in 1..T}: sum{c in 1..C} x[c,t] <= S;
+
+s.t. MaxNemfjoldi{t in 1..T}: sum{c in 1..C} x[c,t] * FjoldiNemenda[c] <= N;
 
 end;
