@@ -70,16 +70,29 @@ for i in thedata:
 T = 20
 C = len(thecoursedata)
 S = 100
-P = 5
 N = 829
+
+P1 = 1000
+P2 = 500
+P3 = 100
+P4 = 50
+P5 = 40
+P6 = 10
 
 f = open('proftafla_test1.dat','w')
 
 f.write('param T := {};\n'.format(T));
 f.write('param C := {};\n'.format(C));
 f.write('param S := {};\n'.format(S));
-f.write('param P := {};\n'.format(P));
 f.write('param N := {};\n'.format(N));
+
+f.write('param P1 := {};\n'.format(P1));
+f.write('param P2 := {};\n'.format(P2));
+f.write('param P3 := {};\n'.format(P3));
+f.write('param P4 := {};\n'.format(P4));
+f.write('param P5 := {};\n'.format(P5));
+f.write('param P6 := {};\n'.format(P6));
+
 
 f.write('param Courses :=\n')
 for i in range(len(thecoursedata)):
