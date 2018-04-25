@@ -3,7 +3,15 @@
 param C >= 0 integer; #Courses
 param T >= 0 integer; #Time periods
 param S >= 0 integer; #Classrooms
-param P >= 0 integer; #refsing
+param N >= 0 integer; #Hámarksfjöldi nemenda fyrir hvert timabil
+param FjoldiNemenda {c in 1..C};
+
+param P1 >= 0 integer; #refsing
+param P2 >= 0 integer;
+param P3 >= 0 integer;
+param P4 >= 0 integer;
+param P5 >= 0 integer;
+param P6 >= 0 integer; 
 
 set FixedCourses within {c in 1..C, t in 1..T};
 set NotAllowed within {c in 1..C, t in 1..T};
@@ -21,7 +29,7 @@ var z6{c in 1..C, c_hat in 1..C: c <> c_hat} binary; #áfangar skarast tvö tím
 var z_hat{c in 1..C, c_hat in 1..C: c <> c_hat} binary; #ef það er ekki dagur/dagar á milli prófa
 
 
-minimize TotalPunishment: sum{c in 1..C, c_hat in 1..C: c <> c_hat} (P * z1[c,c_hat] * Courses[c,c_hat] + P * z2[c,c_hat] * Courses[c,c_hat]) + sum{c in 1..C, t in 1..T} x[c,t] * P;
+minimize TotalPunishment: sum{c in 1..C, c_hat in 1..C: c <> c_hat} (P1 * z1[c,c_hat] * Courses[c,c_hat] + P2 * z2[c,c_hat] * Courses[c,c_hat] + P3 * z3[c,c_hat] * Courses[c,c_hat] + P4 * z4[c,c_hat] * Courses[c,c_hat] + P5 * z5[c,c_hat] * Courses[c,c_hat] + P6 * z6[c,c_hat] * Courses[c,c_hat]);
 
 
 s.t. Exams{c in 1..C}: sum{t in 1..T} x[c,t] = 1;
@@ -50,5 +58,7 @@ s.t. NotAllow{ (c,t) in NotAllowed }: x[c,t]=1;
 s.t. FixCourse{ (c,t) in FixedCourses }: x[c,t]=1;
 
 s.t. ClassR{t in 1..T}: sum{c in 1..C} x[c,t] <= S;
+
+s.t. MaxNemfjoldi{t in 1..T}: sum{c in 1..C} x[c,t] * FjoldiNemenda[c] <= N;
 
 end;

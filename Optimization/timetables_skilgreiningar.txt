@@ -1,0 +1,22 @@
+Skilgreiningar
+
+TotalLectures - Áfangi, hversu margir fyrirlestrar á viku
+
+
+LargeCourse100 - Áfangar sem innihalda yfir 100 manns
+LargeCourse80 - Áfangar sem innihalda yfir 80 manns
+LargeCourse60 - Áfangar sem innihalda yfir 60 manns
+
+(Ef ID á áfanga er í LargeCourse60 en ekki í LargeCourse80 þá eru á milli 60-80 manns í þeim áfanga)
+
+
+
+## Fastar ##
+
+Course100Limit - Fjöldi stofa sem tekur yfir 100 manns
+Course80Limit - Fjöldi stofa sem tekur yfir 80 manns
+Course60Limit - Fjöldi stofa sem tekur yfir 60 manns
+
+param P - Áfangi, tímaslot, refsing
+
+param K - Áfangi 1, Áfangi 2, fjöldi nemenda í þeim báðum
