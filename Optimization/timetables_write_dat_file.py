@@ -22,7 +22,7 @@ def calculate_conflict_penalty(c):
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
-select_course_ids = """select c.id, count(e.student_id)
+select_course_ids = """select c.id, count(e.student_id), 2 as lectures
 from courses c, enrollment e
 where semester_type = {} and department_id = {}
 and c.id = e.course_id
@@ -100,6 +100,12 @@ for i in range(C):
         f.write('{} {} 0\n'.format(i+1,j+1))
 f.write(';\n')
 
+f.write('param TotalLectures :=\n')
+counter = 1
+for i in thecoursedata:
+    f.write('{} {}\n'.format(counter, i[2]))
+    counter = counter + 1
+f.write(';\n')
 
 f.write('set LargeCourse100 :=\n')
 counter = 1
