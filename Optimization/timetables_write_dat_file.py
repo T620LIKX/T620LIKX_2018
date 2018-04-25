@@ -1,6 +1,9 @@
 import pickle
 import psycopg2
 
+semestercode = 20171
+departments = '3,4'
+
 def connect_to_database(host, dbname, username, pw):
     conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
 
@@ -24,7 +27,7 @@ cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
 select_course_ids = """select c.id, count(e.student_id), 2 as lectures
 from courses c, enrollment e
-where semester_type = {} and department_id = {}
+where semester_type = {} and department_id in ({})
 and c.id = e.course_id
 group by c.id
 order by c.id;"""
@@ -38,16 +41,16 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and e1.course_id = c1.id and e2.course_id = c2.id
       and c1.semester_type = c2.semester_type
       and c2.semester_type = {}
-      and c1.department_id = {} and c2.department_id = {}) tmp
+      and c1.department_id in ({}) and c2.department_id in ({})) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
 
 
 
-cursor.execute( select_course_ids.format(20171,4))
+cursor.execute( select_course_ids.format(semestercode, departments))
 thecoursedata = cursor.fetchall()
 
-cursor.execute( select_conflicts.format(20171, 4, 4) )
+cursor.execute( select_conflicts.format(semestercode, departments, departments) )
 thedata = cursor.fetchall()
 
 id_database_to_glpk = {}
