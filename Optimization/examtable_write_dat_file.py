@@ -1,6 +1,9 @@
 import pickle
 import psycopg2
 
+semestercode = 20171
+departments = '3,4'
+
 def connect_to_database(host, dbname, username, pw):
     conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
 
@@ -22,12 +25,14 @@ def calculate_conflict_penalty(c):
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
-select_course_ids = """select id
-from courses
-where semester_type = {} and department_id = {}
+select_course_ids = """select c.id, count(e.student_id)
+from courses c, enrollment e
+where semester_type = {} and department_id in ({})
+and c.id = e.course_id
+group by c.id
 order by id;"""
 
-select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id)
+select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id) 
 from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id as course2
       from enrollment e1, enrollment e2, courses c1, courses c2
       where e1.student_id = e2.student_id
@@ -35,14 +40,14 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and e1.course_id = c1.id and e2.course_id = c2.id
       and c1.semester_type = c2.semester_type
       and c2.semester_type = {}
-      and c1.department_id = {} and c2.department_id = {}) tmp
+      and c1.department_id in ({}) and c2.department_id in ({})) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
 
-cursor.execute( select_course_ids.format(20171,4))
+cursor.execute( select_course_ids.format(semestercode, departments))
 thecoursedata = cursor.fetchall()
 
-cursor.execute( select_conflicts.format(20171, 4, 4) )
+cursor.execute( select_conflicts.format(semestercode, departments,departments) )
 thedata = cursor.fetchall()
 
 id_database_to_glpk = {}
@@ -65,23 +70,45 @@ for i in thedata:
 
 
 #FASTAR
-T = 16
+T = 20
 C = len(thecoursedata)
 S = 100
-P = 5
+N = 829
+
+P1 = 1000
+P2 = 500
+P3 = 100
+P4 = 50
+P5 = 40
+P6 = 10
 
 f = open('proftafla_test1.dat','w')
 
 f.write('param T := {};\n'.format(T));
 f.write('param C := {};\n'.format(C));
 f.write('param S := {};\n'.format(S));
-f.write('param P := {};\n'.format(P));
+f.write('param N := {};\n'.format(N));
+
+f.write('param P1 := {};\n'.format(P1));
+f.write('param P2 := {};\n'.format(P2));
+f.write('param P3 := {};\n'.format(P3));
+f.write('param P4 := {};\n'.format(P4));
+f.write('param P5 := {};\n'.format(P5));
+f.write('param P6 := {};\n'.format(P6));
+
 
 f.write('param Courses :=\n')
 for i in range(len(thecoursedata)):
     for j in range(len(thecoursedata)):
         if i != j:
             f.write('{} {} {}\n'.format( i+1, j+1, conflict_matrix[i+1][j+1] ))
+f.write(';\n')
+
+f.write('param FjoldiNemenda :=\n')
+counter = 1
+for i in thecoursedata:
+    f.write('{} {}\n'.format(counter, i[1]))
+    counter = counter + 1
 f.write(';\n')
 
 f.write('set FixedCourses :=\n')
@@ -112,3 +139,4 @@ id_glpk_to_database = pickle.load(pickle_in)
 pickle_in.close()
 """
 
+print("Run successful!!!")

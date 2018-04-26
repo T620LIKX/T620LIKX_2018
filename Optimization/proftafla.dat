@@ -1,7 +1,21 @@
 param T := 20;
 param C := 4;
 param S := 2;
-param P := 5;
+param P1 := 1000;
+param P2 := 500;
+param P3 := 100;
+param P4 := 50;
+param P5 := 40;
+param P6 := 10;
+
+param N := 500;
+
+param FjoldiNemenda :=
+1 23
+2 43
+3 55
+4 53
+;
 
 param Courses :=
 1 2 3

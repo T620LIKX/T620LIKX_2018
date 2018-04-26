@@ -1,7 +1,8 @@
-param T := 16;
+param T := 20;
 param C := 23;
 param S := 100;
 param P := 5;
+param N := 829;
 param Courses :=
 1 2 0
 1 3 2
@@ -509,6 +510,31 @@ param Courses :=
 23 20 0
 23 21 0
 23 22 4
+;
+param FjoldiNemenda :=
+1 63
+2 53
+3 285
+4 311
+5 226
+6 249
+7 212
+8 236
+9 70
+10 201
+11 188
+12 47
+13 202
+14 31
+15 53
+16 15
+17 109
+18 52
+19 28
+20 22
+21 17
+22 14
+23 8
 ;
 set FixedCourses :=
 ;
