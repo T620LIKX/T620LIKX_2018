@@ -15,6 +15,7 @@ param P6 >= 0 integer;
 
 set FixedCourses within {c in 1..C, t in 1..T};
 set NotAllowed within {c in 1..C, t in 1..T};
+set ComputerExam within {c in 1..C};
 
 param Courses{c in 1..C, c_hat in 1..C: c <> c_hat};
 
@@ -36,8 +37,8 @@ s.t. Exams{c in 1..C}: sum{t in 1..T} x[c,t] = 1;
 
 s.t. Overlap1{t in 1..T, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t] <= 1 + z1[c,c_hat];
 
-s.t. Overlap2a{t in {1,3,5,7,8,11,13,15,17,19}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t+1] <= 1 + z2[c,c_hat];
-s.t. Overlap2b{t in {1,3,5,7,8,11,13,15,17,19}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c_hat,t] + x[c,t+1] <= 1 + z2[c,c_hat];
+s.t. Overlap2a{t in {1,3,5,7,9,11,13,15,17,19}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t+1] <= 1 + z2[c,c_hat];
+s.t. Overlap2b{t in {1,3,5,7,9,11,13,15,17,19}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c_hat,t] + x[c,t+1] <= 1 + z2[c,c_hat];
 
 s.t. Overlap3a{t in {2,4,6,8,12,14,16,18}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t+1] <= 1 + z3[c,c_hat];
 s.t. Overlap3b{t in {2,4,6,8,12,14,16,18}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c_hat,t] + x[c,t+1] <= 1 + z3[c,c_hat];
@@ -51,8 +52,6 @@ s.t. Overlap5b{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}
 s.t. Overlap6a{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t+3] <= 1 + z6[c,c_hat];
 s.t. Overlap6b{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c_hat,t] + x[c,t+3] <= 1 + z6[c,c_hat];
 
-s.t. DaysBetween{t in 1..(T-1), c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c,t+1] + x[c_hat,t] + x[c_hat,t+1] <= 1 + z_hat[c,c_hat];
-
 s.t. NotAllow{ (c,t) in NotAllowed }: x[c,t]=1;
 
 s.t. FixCourse{ (c,t) in FixedCourses }: x[c,t]=1;
@@ -60,5 +59,7 @@ s.t. FixCourse{ (c,t) in FixedCourses }: x[c,t]=1;
 s.t. ClassR{t in 1..T}: sum{c in 1..C} x[c,t] <= S;
 
 s.t. MaxNemfjoldi{t in 1..T}: sum{c in 1..C} x[c,t] * FjoldiNemenda[c] <= N;
+
+s.t. MaxOneComputer{t in 1..T}: sum{c in ComputerExam} x[c,t] <= 1;
 
 end;
