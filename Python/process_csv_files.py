@@ -93,7 +93,7 @@ enrollment.sort()
 
 for i in booking_data:
     if i['sis_Course_Id'] in courses.keys():
-        if i['BookingType'] == 'Fyrirlestrar':
+        if i['BookingType'] == 'Fyrirlestrar' and i['GroupName'] == '':
             semester_type = courses[i['sis_Course_Id']]['semester_type']
             courses[i['sis_Course_Id']]['lectures_per_week'] = helper_functions.calculate_lectures_per_week(semester_type, int(i['Count']))
         elif i['BookingType'] == 'Lokapróf':
