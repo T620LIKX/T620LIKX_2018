@@ -72,7 +72,6 @@ C = 3
 T = 4
 S = 2
 
-
 TotalLectures = tuplelist([2, 2, 3])
 Course100Limit = 2
 Course80Limit = 8
@@ -81,17 +80,30 @@ Course60Limit = 14
 x = m.addVars(C, T, vtype = GRB.BINARY)
 y = m.addVars(C, C, vtype = GRB.BINARY)
 
-PlanCoursesTotal = m.addConstrs((x[(c,t)] == TotalLectures[c] for t in range(int(T/2)) for c in range(C)), name = 'PlanCoursesTotal')
+PlanCoursesTotal = m.addConstrs((x[(c,t)] == TotalLectures[c] for t in range(int(T/2))
+																for c in range(C)), name = 'PlanCoursesTotal')
 
 PlanCoursesI = m.addConstrs((x[(c,t)] >= 1 for t in range(int(T/2)) for c in range(C)), name = 'PlanCoursesI')
 PlanCoursesII = m.addConstrs((x[(c,t)] >= 1 for t in range(int(T/2 + 1)) for c in range(C)), name = 'PlanCoursesII')
-NoConflicts = m.addConstrs((x[(c1,t)] + x[(c2,t)] <= 1 + y[(c1,c2)] for t in range(T) for c1 in range(C) for c2 in range(C)), name = 'NoConflicts')
-RoomsAv = m.addConstrs((x[(c,t)] <= S for c in range(C) for t in range(T)), name = 'RoomsAv')
+NoConflicts = m.addConstrs((x[(c1,t)] + x[(c2,t)] <= 1 + y[(c1,c2)] for t in range(T) 
+																	for c1 in range(C)
+																	for c2 in range(C)), name = 'NoConflicts')
+RoomsAv = m.addConstrs((x[(c,t)] <= S for c in range(C)
+									 	for t in range(T)), name = 'RoomsAv')
 
 
+goal1 = quicksum(conflict_matrix[c1][c2]*y[(c1,c2)] for c1 in range(C)
+													for c2 in range(C))
+goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C)
+											for t in range(T))
 
-goal1 = quicksum(conflict_matrix[c1][c2]*y[(c1,c2)] for c1 in range(C) for c2 in range(C))
-goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C) for t in range(T))
-obj = m.setObjective(goal1 + goal2, GRB.MAXIMIZE)
+obj = m.setObjective(goal1 + goal2, GRB.MINIMIZE)
 
 m.optimize()
+
+m.write('solution.lp')
+
+for v in m.getVars():
+        print('%s %g' % (v.varName, v.x))
+
+print('Obj: %g' % m.objVal)

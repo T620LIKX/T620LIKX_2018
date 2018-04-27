@@ -23,7 +23,7 @@ var y{c1 in 1..C, c2 in 1..C} binary;
 minimize TotalConflicts: sum{c1 in 1..C, c2 in 1..C: c1<>c2} K[c1, c2] * y[c1,c2]
 + sum{c in 1..C, t in 1..T} P[c,t] * x[c,t];
 
-s.t. PlanCoursesTotal{c in 1..C}: sum{t in 1..T/2} x[c,t] = TotalLectures[c];
+s.t. PlanCoursesTotal{c in 1..C}: sum{t in 1..T} x[c,t] = TotalLectures[c];
 
 s.t. PlanCoursesI{c in 1..C}: sum{t in 1..T/2} x[c,t] >= 1;
 s.t. PlanCoursesII{c in 1..C}: sum{t in (T/2 + 1)..T} x[c,t] >= 1;
