@@ -1,0 +1,174 @@
+import psycopg2
+import sys
+
+default_slots = {'timetable': 4, 'examtable': 2}
+default_days = {'timetable': 4, 'examtable': 10}
+
+def leftpad(s,w,padding=' '):
+    return padding*(w-len(s))+s
+
+def connect_to_database(host, dbname, username, pw):
+    conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
+
+    try:
+        conn = psycopg2.connect(conn_string)
+    except psycopg2.OperationalError as e:
+        print('Connection failed!')
+        print('Error message:', e)
+        exit()
+
+    cursor = conn.cursor()
+
+    return cursor, conn
+
+def create_table(sol):
+    solution_type = 'examtable'
+    slots = default_slots[solution_type]
+    days = default_days[solution_type]
+
+    thetable = [[ 0 for _ in range(slots)] for _ in range(days)]
+
+    for s in sol:
+        thetimeslot = (s[0]-1) % slots
+        theday = (s[0]-1) // slots
+
+        thetable[theday][thetimeslot] += s[1]
+
+    return thetable, slots, days
+
+
+def print_solution(timetable, slots, days):
+    fieldwidth = 0
+    fieldheight = 1
+    for i in range(days):
+        for j in range(slots):
+            fieldwidth = max(fieldwidth, len(str(thetable[i][j])))
+
+
+    print(leftpad('-',3+(fieldwidth+1)*days,padding='-'))
+    for timeslot in range(slots):
+        for d in range(days):
+            print('|',end='')
+            if d == days//2:
+                print('-|',end='')
+
+            print(leftpad(str(thetable[d][timeslot]),fieldwidth), end='')
+        print('|')
+    print(leftpad('-',3+(fieldwidth+1)*days,padding='-'))
+
+
+cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
+
+if len(sys.argv) > 1:
+    solution_id = int(sys.argv[1])
+else:
+    select_max_solution_id = "select max(solution_id) from solutions;"
+    cursor.execute(select_max_solution_id)
+    max_solution_id = cursor.fetchall()
+    if max_solution_id[0][0] is not None:
+        solution_id = max_solution_id[0][0]
+    else:
+        solution_id = -1
+
+students_in_timeslot = """select s.timeslot, count(e.student_id)
+from courses c, enrollment e, solutions s
+where solution_id = {}
+and c.id = s.course_id
+and c.id = e.course_id
+group by s.timeslot
+order by s.timeslot;"""
+
+cursor.execute(students_in_timeslot.format(solution_id))
+total_students_in_timeslot = cursor.fetchall()
+
+
+
+if len(students_in_timeslot) == 0:
+    print('No solution found')
+    exit()
+
+
+headline = "Fjöldi nemenda í prófi í hverju tímaslotti"
+print(headline)
+thetable, slots, days = create_table(total_students_in_timeslot)
+print_solution(thetable, slots, days)
+
+
+#Fjöldi nemenda í hverju lokaprófi
+student_taking_exam = """select c.course_code, c.course_name, s.timeslot, count(e.student_id)
+from courses c, enrollment e, solutions s
+where solution_id = {}
+and c.id = s.course_id
+and c.id = e.course_id
+group by c.course_code, c.course_name, s.timeslot
+order by s.timeslot;"""
+
+cursor.execute(student_taking_exam.format(solution_id))
+total_students_taking_exam = cursor.fetchall()
+
+print('\n')
+print('Fjöldi nemenda í hverju lokaprófi')
+for x in total_students_taking_exam:
+	print(x[0], '-', x[1], '- fjöldi nemanda:', x[3])
+
+#skörun í sama tímaslotti
+	
+student_skorun = """select e1.student_id, c1.course_code, c2.course_code, s1.timeslot
+from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
+where s1.solution_id = {}
+and s2.solution_id = s1.solution_id
+and e1.student_id = e2.student_id
+and e1.course_id < e2.course_id
+and e1.course_id = s1.course_id and e2.course_id = s2.course_id
+and e1.course_id = c1.id and e2.course_id = c2.id
+and s1.timeslot = s2.timeslot
+group by e1.student_id, c1.course_code, c2.course_code, s1.timeslot
+order by e1.student_id"""
+
+cursor.execute(student_skorun.format(solution_id))
+total_students_skorun = cursor.fetchall()
+
+counter = 0
+for x in total_students_skorun:
+	counter += 1
+
+print('\n')
+print('Fjöldi nemenda sem skráðir eru í próf í sama tímaslotti:', counter)
+
+for x in total_students_skorun:
+	print('Student ID:', x[0], '- áfangar sem skarast:', x[1], 'og', x[2], '- tímaslott:', x[3])
+
+
+#próf fyrir og eftir hádegi 
+
+student_skorun_fyrir_og_eftir_hadegi = """select e1.student_id, c1.course_code, s1.timeslot, c2.course_code, s2.timeslot
+from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
+where s1.solution_id = {}
+and s2.solution_id = s1.solution_id
+and e1.student_id = e2.student_id
+and e1.course_id < e2.course_id
+and e1.course_id = s1.course_id and e2.course_id = s2.course_id
+and e1.course_id = c1.id and e2.course_id = c2.id
+and s1.timeslot + 1 = s2.timeslot
+and s2.timeslot%2 = 0
+group by e1.student_id, c1.course_code, s1.timeslot, c2.course_code, s2.timeslot
+order by e1.student_id"""
+
+
+cursor.execute(student_skorun_fyrir_og_eftir_hadegi.format(solution_id))
+total_student_skorun_fyrir_og_eftir_hadegi = cursor.fetchall()
+conn.close()
+
+counter = 0
+for x in total_student_skorun_fyrir_og_eftir_hadegi:
+	counter +=1
+
+print('\n')	
+print('Fjöldi nemenda sem eru skráðir í próf fyrir og eftir hádegi sama dags: ', counter)
+
+for x in total_student_skorun_fyrir_og_eftir_hadegi:
+	print('Student ID: ', x[0], '- áfangar sem skarast:' ,x[1] , 'og', x[3], '- tímaslott:', x[2], 'og', x[4])
+	
+
+
+
