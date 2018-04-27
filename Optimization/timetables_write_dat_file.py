@@ -81,6 +81,15 @@ for i in thedata:
     conflict_matrix[course_2][course_1] = conflict_penalty
 
 
+fixedcoursesfile = open('timetable_fixedcourses.txt')
+fixedcourses =fixedcoursesfile.readlines()
+fixedcoursesfile.close()
+
+notallowedfile = open('timetable_notallowed.txt')
+notallowed = notallowedfile.readlines()
+notallowedfile.close()
+
+
 #FASTAR
 
 T = 16
@@ -141,6 +150,31 @@ for i in thecoursedata:
     if i[1] >= 60:
         f.write('{}\n'.format(counter))
     counter = counter + 1
+f.write(';\n')
+
+
+f.write('set FixedCourses :=\n')
+for x in fixedcourses:
+    course_id = x.split()[0]
+    timeslot = x.split()[1]
+    includethiscourse = False
+    for i in thecoursedata:
+        if i[0] == course_id:
+            includethiscourse = True
+        if includethiscourse:
+            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+f.write(';\n')
+
+f.write('set NotAllowed :=\n')
+for x in fixedcourses:
+    course_id = x.split()[0]
+    timeslot = x.split()[1]
+    includethiscourse = False
+    for i in thecoursedata:
+        if i[0] == course_id:
+            includethiscourse = True
+        if includethiscourse:
+            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('param Course100Limit := {};\n'.format(Course100Limit));
