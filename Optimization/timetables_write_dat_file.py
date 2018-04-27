@@ -20,7 +20,16 @@ def connect_to_database(host, dbname, username, pw):
 
 
 def calculate_conflict_penalty(c):
-    return c
+    if c <= 10:
+        return c
+    elif c <= 20:
+        return c*2
+    elif c <= 40:
+        return c*3
+    elif c <= 100:
+        return c*4
+    elif c > 100:
+        return c*5 
 
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')

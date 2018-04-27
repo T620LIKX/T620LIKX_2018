@@ -68,6 +68,14 @@ for i in thedata:
     conflict_matrix[course_1][course_2] = conflict_penalty
     conflict_matrix[course_2][course_1] = conflict_penalty
 
+fixedcoursesfile = open('examt_fixedcourses.txt')
+fixedcourses =fixedcoursesfile.readlines()
+fixedcoursesfile.close()
+
+notallowedfile = open('examt_notallowed.txt')
+notallowed = notallowedfile.readlines()
+notallowedfile.close()
+
 
 #FASTAR
 T = 20
@@ -112,11 +120,27 @@ for i in thecoursedata:
 f.write(';\n')
 
 f.write('set FixedCourses :=\n')
-#f.write('1 1\n')
+for x in fixedcourses:
+    course_id = x.split()[0]
+    timeslot = x.split()[1]
+    includethiscourse = False
+    for i in thecoursedata:
+        if i[0] == course_id:
+            includethiscourse = True
+        if includethiscourse:
+            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('set NotAllowed :=\n')
-#f.write('3 1\n')
+for x in notallowed:
+    course_id = x.split()[0]
+    timeslot = x.split()[1]
+    includethiscourse = False
+    for i in thecoursedata:
+        if i[0] == course_id:
+            includethiscourse = True
+    if includethiscourse:
+        f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('set ComputerExam :=\n')
