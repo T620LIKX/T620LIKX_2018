@@ -17,7 +17,7 @@ def connect_to_database(host, dbname, username, pw):
     return cursor, conn
 
 def get_data(filename, delimiter=';'):
-    file = open(filename)
+    file = open(filename, encoding = 'utf-8')
     reader = csv.DictReader(file, delimiter=delimiter)
     data = []
     for row in reader:
