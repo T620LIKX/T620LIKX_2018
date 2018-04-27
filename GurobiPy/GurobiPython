@@ -82,24 +82,24 @@ for i in thedata:
     conflict_matrix[course_2][course_1] = conflict_penalty
 
 
-#----------- Gurobi model --------------------
+#----------- Gurobi Timetable model --------------------
 
 m = Model("Timetable")
 
- m.setParam(GRB.Param.TimeLimit, 100.0)
+m.setParam(GRB.Param.TimeLimit, 150.0)
 
 C = len(thecoursedata)
 T = 16
-S = 100
-
+S = 55
 TotalLectures = 2
+
 Course100Limit = 2
 Course80Limit = 8
 Course60Limit = 14
 
-LargeCourse100 = 1
-LargeCourse80 = 2
-LargeCourse60 = 3
+LargeCourse100 = tuplelist([3, 4, 5, 6, 7, 8, 10, 11, 13, 17])
+LargeCourse80 = tuplelist([3, 4, 5, 6, 7, 8, 10, 11, 13, 17])
+LargeCourse60 = tuplelist([3, 4, 5, 6, 7, 8, 10, 11, 13, 17])
 
 x = m.addVars(C, T, vtype = GRB.BINARY, name = 'x')
 y = m.addVars(C, C, vtype = GRB.BINARY, name = 'y')
@@ -109,26 +109,26 @@ PlanCoursesTotal = m.addConstrs((quicksum(x[(c,t)] for t in range(T)) == TotalLe
 																for c in range(C)), name = 'PlanCoursesTotal')
 
 PlanCoursesI = m.addConstrs((quicksum(((x[(c,t)] for t in range(int(T/2))))) >= 1  for c in range(C)), name = 'PlanCoursesI')
-PlanCoursesII = m.addConstrs((quicksum(((x[(c,t)] for t in range(int(T/2 + 1))))) >= 1  for c in range(C)), name = 'PlanCoursesII')
+PlanCoursesII = m.addConstrs((quicksum(((x[(c,t)] for t in range(int(T/2 + 1), T)))) >= 1  for c in range(C)), name = 'PlanCoursesII')
 NoConflicts = m.addConstrs((x[(c1,t)] + x[(c2,t)] <= 1 + y[(c1,c2)] for t in range(T) 
 																	for c1 in range(C)
 																	for c2 in range(C)
 																	if c1 != c2), name = 'NoConflicts')
 RoomsAv = m.addConstrs((quicksum(x[(c,t)] for c in range(C)) <= S
 									 	for t in range(T)), name = 'RoomsAv')
-#Skoda thetta betur
-S100 = m.addConstrs((quicksum(x[(c,t)] for c in range(LargeCourse100)) <= Course100Limit for t in range(T)), name = 'S100')
-S80 = m.addConstrs((quicksum(x[(c,t)] for c in range(LargeCourse80)) <= Course80Limit for t in range(T)), name = 'S80')
-S60 = m.addConstrs((quicksum(x[(c,t)] for c in range(LargeCourse60)) <= Course60Limit for t in range(T)), name = 'S60')
+
+S100 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse100) <= Course100Limit for t in range(T)), name = 'S100')
+S80 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse80) <= Course80Limit for t in range(T)), name = 'S80')
+S60 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse60) <= Course60Limit for t in range(T)), name = 'S60')
 
 
 goal1 = quicksum(conflict_matrix[c1][c2]*y[(c1,c2)] for c1 in range(C)
 													for c2 in range(C)
 													if c1 != c2)
-goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C)
-											for t in range(T))
+#goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C)
+#											for t in range(T))
 
-obj = m.setObjective(goal1 + goal2, GRB.MINIMIZE)
+obj = m.setObjective(goal1, GRB.MINIMIZE)
 
 m.optimize()
 
