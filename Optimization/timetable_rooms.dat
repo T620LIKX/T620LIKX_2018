@@ -18,6 +18,6 @@ param N :=
 4 10
 ;
 
-#set Not allowed :=
-#1 6
-#;
+set NotAllowed :=
+1 6
+;
