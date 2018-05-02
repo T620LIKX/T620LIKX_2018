@@ -34,10 +34,11 @@ def calculate_conflict_penalty(c):
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
-select_course_ids = """select c.id, count(e.student_id), 2 as lectures
+select_course_ids = """select c.id, count(e.student_id), c.lectures_per_week
 from courses c, enrollment e
-where semester_type = {} and department_id in ({})
+where semester_type = {} and department_id in ({}) and lectures_per_week > 1
 and c.id = e.course_id
+and graduate_course = false
 group by c.id
 order by c.id;"""
 
