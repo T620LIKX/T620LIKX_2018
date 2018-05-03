@@ -20,5 +20,5 @@ s.t. NotA{(c,r) in NotAllowed }: x[c,r] = 0;
 
 end;
 
-# glpsol --math -m timetable_rooms.mod -d timetable_rooms.dat --check --wlp timetable_rooms.lp
+# glpsol --math -m timetable_rooms.mod -d timetable_rooms_test1.dat --check --wlp timetable_rooms.lp
 # gurobi_cl ResultFile=timetable_rooms.sol timetable_rooms.lp

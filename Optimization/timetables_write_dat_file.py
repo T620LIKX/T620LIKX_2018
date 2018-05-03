@@ -29,7 +29,7 @@ def calculate_conflict_penalty(c):
     elif c <= 100:
         return c*4
     elif c > 100:
-        return c*5 
+        return c*5
 
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
@@ -166,8 +166,8 @@ for x in fixedcourses:
     for i in thecoursedata:
         if i[0] == course_id:
             includethiscourse = True
-        if includethiscourse:
-            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+    if includethiscourse:
+        f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('set NotAllowed :=\n')
@@ -178,8 +178,8 @@ for x in fixedcourses:
     for i in thecoursedata:
         if i[0] == course_id:
             includethiscourse = True
-        if includethiscourse:
-            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+    if includethiscourse:
+        f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('param Course100Limit := {};\n'.format(Course100Limit));
