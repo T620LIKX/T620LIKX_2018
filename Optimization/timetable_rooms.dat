@@ -1,0 +1,23 @@
+param C := 4;
+param R := 6;
+
+param S :=
+1 5
+2 10
+3 5
+4 10 
+5 15
+6 10
+;
+
+
+param N :=
+1 20
+2 15
+3 5
+4 10
+;
+
+set NotAllowed :=
+1 6
+;
