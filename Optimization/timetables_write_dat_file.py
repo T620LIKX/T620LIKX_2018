@@ -160,7 +160,7 @@ f.write(';\n')
 
 f.write('set FixedCourses :=\n')
 for x in fixedcourses:
-    course_id = x.split()[0]
+    course_id = int(x.split()[0])
     timeslot = x.split()[1]
     includethiscourse = False
     for i in thecoursedata:
@@ -172,7 +172,7 @@ f.write(';\n')
 
 f.write('set NotAllowed :=\n')
 for x in fixedcourses:
-    course_id = x.split()[0]
+    course_id = int(x.split()[0])
     timeslot = x.split()[1]
     includethiscourse = False
     for i in thecoursedata:
