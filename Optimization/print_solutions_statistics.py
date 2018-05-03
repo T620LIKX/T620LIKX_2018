@@ -175,9 +175,6 @@ for x in total_student_skorun_fyrir_og_eftir_hadegi:
 print('\n')
 print('Fjöldi nemenda sem eru skráðir í próf fyrir og eftir hádegi sama dags: ', counter)
 
-for x in total_student_skorun_fyrir_og_eftir_hadegi:
-	print('Student ID: ', x[0], '- áfangar sem skarast:' ,x[1] , 'og', x[3], '- tímaslott:', x[2], 'og', x[4])
-
 select_solution = """select s.course_id, c.course_code, d.department_name, s.timeslot, s.solution_type, e.student_id
 from solutions s, courses c, departments d, enrollment e
 where s.course_id = c.id and c.department_id = d.id and c.id = e.course_id
