@@ -65,6 +65,14 @@ for i in therooms:
     room_glpk_to_database[counter] = i[0]
     counter = counter + 1
 
+#ath stadsetningu
+fixedcoursesfile = open('timetable_fixedcourses_rooms.txt')
+fixedcourses =fixedcoursesfile.readlines()
+fixedcoursesfile.close()
+
+notallowedfile = open('timetable_notallowed_rooms.txt')
+notallowed = notallowedfile.readlines()
+notallowedfile.close()
 
 C = len(thecourses)
 R = len(therooms)
@@ -89,6 +97,27 @@ for c in thecourses:
 f.write(';\n')
 
 f.write('set NotAllowed :=\n')
+for x in notallowed:
+    course_id = int(x.split()[0])
+    room_id = int(x.split()[1])
+    includethiscourse = False
+    for i in thecourses:
+        if i[0] == course_id:
+            includethiscourse = True
+    if includethiscourse:
+        f.write('{} {}\n'.format(course_database_to_glpk[course_id], room_database_to_glpk[room_id]))
+f.write(';\n')
+
+f.write('set FixedCourses :=\n')
+for x in fixedcourses:
+    course_id = int(x.split()[0])
+    room_id = int(x.split()[1])
+    includethiscourse = False
+    for i in thecourses:
+        if i[0] == course_id:
+            includethiscourse = True
+    if includethiscourse:
+        f.write('{} {}\n'.format(course_database_to_glpk[course_id], room_database_to_glpk[room_id]))
 f.write(';\n')
 f.write('end;\n')
 
