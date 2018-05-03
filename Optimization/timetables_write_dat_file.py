@@ -2,7 +2,7 @@ import pickle
 import psycopg2
 
 semestercode = 20171
-departments = '3,4'
+departments = '5,6'
 
 def connect_to_database(host, dbname, username, pw):
     conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
@@ -34,7 +34,7 @@ def calculate_conflict_penalty(c):
 
 cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
 
-select_course_ids = """select c.id, count(e.student_id), c.lectures_per_week
+select_course_ids = """select c.id, count(e.student_id), c.lectures_per_week as lectures
 from courses c, enrollment e
 where semester_type = {} and department_id in ({}) and lectures_per_week > 1
 and c.id = e.course_id
@@ -51,7 +51,11 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and e1.course_id = c1.id and e2.course_id = c2.id
       and c1.semester_type = c2.semester_type
       and c2.semester_type = {}
-      and c1.department_id in ({}) and c2.department_id in ({})) tmp
+      and c1.department_id in ({}) and c2.department_id in ({})
+      and c1.lectures_per_week > 1
+      and c2.lectures_per_week > 1
+      and c1.graduate_course = false
+      and c2.graduate_course = false) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
 
@@ -203,3 +207,4 @@ id_glpk_to_database = pickle.load(pickle_in)
 pickle_in.close()
 """
 
+print("Run successful!")
