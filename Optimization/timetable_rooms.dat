@@ -21,3 +21,7 @@ param N :=
 set NotAllowed :=
 1 6
 ;
+
+set FixedCourses :=
+3 3
+;
