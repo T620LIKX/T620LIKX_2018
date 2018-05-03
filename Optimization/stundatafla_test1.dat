@@ -2202,8 +2202,12 @@ set LargeCourse60 :=
 37
 ;
 set FixedCourses :=
+24 13
+11 4
 ;
 set NotAllowed :=
+24 13
+11 4
 ;
 param Course100Limit := 2;
 param Course80Limit := 8;
