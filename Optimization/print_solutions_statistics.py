@@ -125,9 +125,8 @@ total_students_in_table= cursor.fetchall()
 
 print('Heildarfjöldi nemenda sem skráðir eru í lokapróf:', total_students_in_table[0][0])
 
+#skörun í sama tímaslotti
 
-#skörun í sama tímaslotti 
-    
 student_skorun = """select e1.student_id, c1.course_code, c2.course_code, s1.timeslot
 from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
 where s1.solution_id = {}
@@ -150,7 +149,7 @@ for x in total_students_skorun:
 print('Fjöldi nemenda sem skráðir eru í próf í sama tímaslotti:', counter)
 
 
-#próf fyrir og eftir hádegi 
+#próf fyrir og eftir hádegi
 
 student_skorun_fyrir_og_eftir_hadegi = """select e1.student_id, c1.course_code, s1.timeslot, c2.course_code, s2.timeslot
 from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
@@ -173,8 +172,12 @@ counter = 0
 for x in total_student_skorun_fyrir_og_eftir_hadegi:
     counter +=1
 
+print('\n')
 print('Fjöldi nemenda sem eru skráðir í próf fyrir og eftir hádegi sama dags: ', counter)
-    
+
+for x in total_student_skorun_fyrir_og_eftir_hadegi:
+	print('Student ID: ', x[0], '- áfangar sem skarast:' ,x[1] , 'og', x[3], '- tímaslott:', x[2], 'og', x[4])
+
 select_solution = """select s.course_id, c.course_code, d.department_name, s.timeslot, s.solution_type, e.student_id
 from solutions s, courses c, departments d, enrollment e
 where s.course_id = c.id and c.department_id = d.id and c.id = e.course_id
@@ -205,7 +208,7 @@ for i in thestudents:
     this_student_is_3days_in_row = False
     for theday in [0,1,2,5,6,7]:
         if (len(thetable[theday][0]+thetable[theday][1]) > 0) and (len(thetable[theday+1][0]+thetable[theday+1][1]) > 0) and (len(thetable[theday+2][0]+thetable[theday+2][1]) > 0):
-            this_student_is_3days_in_row = True    
+            this_student_is_3days_in_row = True
 
     if this_student_is_3days_in_row:
         fjoldi_nem_3daga_i_rod += 1
@@ -215,7 +218,7 @@ for i in thestudents:
     this_student_is_4days_in_row = False
     for theday in [0,1,5,6]:
         if (len(thetable[theday][0]+thetable[theday][1]) > 0) and (len(thetable[theday+1][0]+thetable[theday+1][1]) > 0) and (len(thetable[theday+2][0]+thetable[theday+2][1]) > 0) and (len(thetable[theday+3][0]+thetable[theday+3][1]) > 0):
-            this_student_is_4days_in_row = True    
+            this_student_is_4days_in_row = True
 
     if this_student_is_4days_in_row:
         fjoldi_nem_4daga_i_rod += 1
@@ -225,7 +228,7 @@ for i in thestudents:
     this_student_is_5days_in_row = False
     for theday in [0,5]:
         if (len(thetable[theday][0]+thetable[theday][1]) > 0) and (len(thetable[theday+1][0]+thetable[theday+1][1]) > 0) and (len(thetable[theday+2][0]+thetable[theday+2][1]) > 0) and (len(thetable[theday+3][0]+thetable[theday+3][1]) > 0) and (len(thetable[theday+4][0]+thetable[theday+4][1]) > 0):
-            this_student_is_5days_in_row = True    
+            this_student_is_5days_in_row = True
 
     if this_student_is_5days_in_row:
         fjoldi_nem_5daga_i_rod += 1
@@ -235,13 +238,15 @@ for i in thestudents:
     this_student_is_2days_in_row = False
     for theday in [0,1,2,3,5,6,7,8]:
         if (len(thetable[theday][0]+thetable[theday][1]) > 0) and (len(thetable[theday+1][0]+thetable[theday+1][1]) > 0):
-            this_student_is_2days_in_row = True    
+            this_student_is_2days_in_row = True
 
     if this_student_is_2days_in_row:
         fjoldi_nem_2daga_i_rod += 1
 
         #print_solution(thetable, slots, days)
- 
+
+print('\n')
+
 print('Fjöldi nemenda í tveimur eða fleiri prófum 2 daga í röð: {}'.format(fjoldi_nem_2daga_i_rod))
 print('Fjöldi nemenda í þremur eða fleiri prófum 3 daga í röð: {}'.format(fjoldi_nem_3daga_i_rod))
 print('Fjöldi nemenda í fjórum eða fleiri prófum 4 daga í röð: {}'.format(fjoldi_nem_4daga_i_rod))
