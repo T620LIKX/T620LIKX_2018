@@ -2,7 +2,7 @@ import pickle
 import psycopg2
 
 semestercode = 20171
-departments = '3,4'
+departments = '3,4,5'
 
 def connect_to_database(host, dbname, username, pw):
     conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
@@ -121,7 +121,7 @@ f.write(';\n')
 
 f.write('set FixedCourses :=\n')
 for x in fixedcourses:
-    course_id = x.split()[0]
+    course_id = int(x.split()[0])
     timeslot = x.split()[1]
     includethiscourse = False
     for i in thecoursedata:
