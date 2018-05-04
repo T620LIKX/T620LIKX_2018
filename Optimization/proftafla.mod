@@ -1,4 +1,4 @@
-/*Proftafla*/
+
 
 param C >= 0 integer; #Courses
 param T >= 0 integer; #Time periods
@@ -52,7 +52,7 @@ s.t. Overlap5b{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}
 s.t. Overlap6a{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c,t] + x[c_hat,t+3] <= 1 + z6[c,c_hat];
 s.t. Overlap6b{t in {1,3,5,7,11,13,15,17}, c in 1..C, c_hat in 1..C: c <> c_hat}: x[c_hat,t] + x[c,t+3] <= 1 + z6[c,c_hat];
 
-s.t. NotAllow{ (c,t) in NotAllowed }: x[c,t]=1;
+s.t. NotAllow{ (c,t) in NotAllowed }: x[c,t]=0;
 
 s.t. FixCourse{ (c,t) in FixedCourses }: x[c,t]=1;
 
