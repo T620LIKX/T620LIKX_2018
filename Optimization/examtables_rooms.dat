@@ -1,0 +1,37 @@
+
+param C := 3;
+param R := 4;
+param alfa := 1;
+param beta := 1;
+
+param F :=
+1 20
+2 30
+3 50
+;
+
+param S :=
+1 40
+2 25
+3 25
+4 25
+;
+
+param K :=
+1 3
+2 3
+3 3
+4 3
+;
+
+param P :=
+1 1
+2 3
+3 1
+;
+
+set NotAllowed :=
+3 3
+;
+
+end;
