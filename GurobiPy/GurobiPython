@@ -66,7 +66,7 @@ thedata = cursor.fetchall()
 id_database_to_glpk = {}
 id_glpk_to_database = {}
 
-counter = 1
+counter = 0
 for i in thecoursedata:
     id_database_to_glpk[i[0]] = counter
     id_glpk_to_database[counter] = i[0]
@@ -121,20 +121,43 @@ S100 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse100) <= Course100Limi
 S80 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse80) <= Course80Limit for t in range(T)), name = 'S80')
 S60 = m.addConstrs((quicksum(x[(c,t)] for c in LargeCourse60) <= Course60Limit for t in range(T)), name = 'S60')
 
-
 goal1 = quicksum(conflict_matrix[c1][c2]*y[(c1,c2)] for c1 in range(C)
 													for c2 in range(C)
 													if c1 != c2)
-#goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C)
-#											for t in range(T))
+goal2 = quicksum(conflict_penalty*x[(c,t)] for c in range(C)
+											for t in range(T))
 
 obj = m.setObjective(goal1, GRB.MINIMIZE)
 
 m.optimize()
 
 m.write('solutionLikan.lp')
+#m.write('solutionLikan.sol')
 
 #for v in m.getVars():
 #        print('%s %g' % (v.varName, v.x))
 
 print('Obj: %g' % m.objVal)
+
+
+solution_id = 1
+select_max_solution_id = "select max(solution_id) from solutions;"
+cursor.execute(select_max_solution_id)
+max_solution_id = cursor.fetchall()
+if max_solution_id[0][0] is not None:
+    solution_id = 1 + max_solution_id[0][0]
+
+insert_solution = "insert into solutions (solution_id, solution_type, course_id, timeslot) values ({},'timetable',{},{});"
+
+variables = m.getVars()
+for v in variables:
+    if v.x > 0.99:
+    	print(v.varName)
+    	course_id = int(v.varName.split('[')[1].split(']')[0].split(',')[0])
+        database_course_id = id_glpk_to_database[ course_id ]
+        timeslot = int(v.varname.split('[')[1].split(']')[0].split(',')[1])
+        print('Course {} is in timeslot {}'.format(database_course_id, timeslot))
+        cursor.execute(insert_solution.format(solution_id, database_course_id, timeslot))
+
+conn.commit()
+conn.close()
