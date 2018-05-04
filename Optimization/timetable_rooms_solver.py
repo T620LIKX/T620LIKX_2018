@@ -27,7 +27,6 @@ else:
     else:
         solution_id = -1
 
-
 select_courses = """select s.course_id, count(e.student_id)
 from solutions s, enrollment e
 where s.solution_id = {}
@@ -40,7 +39,7 @@ select_rooms = """select id, name, seats from rooms
 where description like '%ennslustofa%'
 or description like '%Málstofa%';"""
 
-insert_solution = "insert into solutions_room_assignment () values ();"
+insert_solution = "insert into solution_room_assignment (solution_id, timeslot, course_id, room_id, student_count) values ({},{},{},{},{});"
 
 thetimeslot = 1
 while thetimeslot <= 16:
@@ -56,16 +55,16 @@ while thetimeslot <= 16:
 
     counter = 1
     for i in thecourses:
-        course_database_to_glpk[i[0]] = counter
-        course_glpk_to_database[counter] = i[0]
+        course_database_to_glpk[int(i[0])] = counter
+        course_glpk_to_database[counter] = int(i[0])
         counter = counter + 1
 
     room_database_to_glpk = {}
     room_glpk_to_database = {}
     counter = 1
     for i in therooms:
-        room_database_to_glpk[i[0]] = counter
-        room_glpk_to_database[counter] = i[0]
+        room_database_to_glpk[int(i[0])] = counter
+        room_glpk_to_database[counter] = int(i[0])
         counter = counter + 1
 
     #ath stadsetningu
@@ -123,16 +122,23 @@ while thetimeslot <= 16:
             f.write('{} {}\n'.format(course_database_to_glpk[course_id], room_database_to_glpk[room_id]))
     f.write(';\n')
     f.write('end;\n')
+    f.close()
 
 
     # Keyra bestun
-    call(["glpsol", "--math", "-m", "stundatafla.mod", "-d", "timetable_rooms_test1.dat", "--check", "--wlp", "stundatafla.lp"])
-    call(["gurobi_cl", "ResultFile=stundatafla.sol", "stundatafla.lp"])
+    call(["glpsol", "--math", "-m", "timetable_rooms.mod", "-d", "timetable_rooms_test1.dat", "--check", "--wlp", "timetable_rooms.lp"])
+    call(["gurobi_cl", "ResultFile=timetable_rooms.sol", "timetable_rooms.lp"])
 
     # Lesa lausn
-    the_solution_file = open('stundatafla.sol','r')
+    the_solution_file = open('timetable_rooms.sol','r')
     the_solution = the_solution_file.readlines()
     the_solution_file.close()
+
+    print('-------------------')
+    print(course_glpk_to_database)
+    print('-------------------')
+    print(room_glpk_to_database)
+    print('-------------------')
 
     for t in the_solution:
         t = t.strip()
@@ -141,7 +147,7 @@ while thetimeslot <= 16:
             room_id = int(t.split('(')[1].split(')')[0].split(',')[1])
             database_course_id = course_glpk_to_database[ course_id ]
             database_room_id = room_glpk_to_database[ room_id ]
-            cursor.execute(insert_solution.format())
+            cursor.execute(insert_solution.format(solution_id, thetimeslot, database_course_id, database_room_id, 1))
     conn.commit()
 
     thetimeslot = thetimeslot + 1
