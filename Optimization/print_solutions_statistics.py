@@ -162,11 +162,16 @@ if proftafla == True:
     cursor.execute(student_skorun.format(solution_id))
     total_students_skorun = cursor.fetchall()
 
-    counter = 0
-    for x in total_students_skorun:
-        counter += 1
 
-    print('Fjöldi nemenda sem skráðir eru í próf í sama tímaslotti:', counter)
+    if len(total_students_skorun) == 0:
+        print('Enginn nemandi er skráður í tvö próf á sama tíma.')
+
+    else:
+        counter = 0
+        for x in total_students_skorun:
+            counter += 1
+
+        print('Fjöldi nemenda sem skráðir eru í próf í sama tímaslotti:', counter)
 
 
     #próf fyrir og eftir hádegi
@@ -192,7 +197,6 @@ if proftafla == True:
     for x in total_student_skorun_fyrir_og_eftir_hadegi:
         counter +=1
 
-    print('\n')
     print('Fjöldi nemenda sem eru skráðir í próf fyrir og eftir hádegi sama dags: ', counter)
 
     select_solution = """select s.course_id, c.course_code, d.department_name, s.timeslot, s.solution_type, e.student_id
@@ -262,7 +266,6 @@ if proftafla == True:
 
             #print_solution(thetable, slots, days)
 
-    print('\n')
 
     print('Fjöldi nemenda í tveimur eða fleiri prófum 2 daga í röð: {}'.format(fjoldi_nem_2daga_i_rod))
     print('Fjöldi nemenda í þremur eða fleiri prófum 3 daga í röð: {}'.format(fjoldi_nem_3daga_i_rod))
@@ -299,7 +302,67 @@ if proftafla == True:
             print('Student ID: ', x[0], '- áfangar sem skarast:' ,x[1] , 'og', x[3], '- tímaslott:', x[2], 'og', x[4])
 
 elif stundatafla == True:
-    print('Stundatafla')
+    
+    student_skorun = """select e1.student_id, c1.course_code, c2.course_code, s1.timeslot
+    from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
+    where s1.solution_id = {}
+    and s2.solution_id = s1.solution_id
+    and e1.student_id = e2.student_id
+    and e1.course_id < e2.course_id
+    and e1.course_id = s1.course_id and e2.course_id = s2.course_id
+    and e1.course_id = c1.id and e2.course_id = c2.id
+    and s1.timeslot = s2.timeslot
+    group by e1.student_id, c1.course_code, c2.course_code, s1.timeslot
+    order by e1.student_id"""
+
+    cursor.execute(student_skorun.format(solution_id))
+    total_students_skorun = cursor.fetchall()
+
+    if len(total_students_skorun) == 0:
+        print('Engin nemandi er skráður í tvo áfanga á sama tíma.')
+    else:
+        counter = 0
+        for x in total_students_skorun:
+            counter += 1
+        print('Fjöldi nemenda sem skráðir eru í fleiri en einn áfanga sem kenndir eru í sama tímaslotti:', counter)
+
+    nem_i_gati = """ select e1.student_id, c1.course_code, s1.timeslot, c2.course_code, s2.timeslot
+    from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
+    where s1.solution_id = {}
+    and s2.solution_id = s1.solution_id
+    and e1.student_id = e2.student_id
+    and e1.course_id < e2.course_id
+    and e1.course_id = s1.course_id and e2.course_id = s2.course_id
+    and e1.course_id = c1.id and e2.course_id = c2.id
+    and s1.timeslot + 3 = s2.timeslot
+    and s2.timeslot % 4 = 0
+    group by e1.student_id, c1.course_code, s1.timeslot, c2.course_code, s2.timeslot
+    order by e1.student_id"""
+
+    cursor.execute(nem_i_gati.format(solution_id))
+    total_nem_i_gati = cursor.fetchall()
+
+
+    if len(total_nem_i_gati) == 0:
+        print('Enginn nemandi er í gati á milli 10:05 og 14:00.')
+    else:
+        counter = 0
+        for x in total_nem_i_gati:
+            counter += 1
+        print('Fjöldi nemenda sem skráðir eru einhvern dag vikunnar í gati á milli 10:05 og 14:00 :', counter)
+
+        if print_details == True:
+            for x in total_nem_i_gati:
+                if x[2] == 1:
+                    dagur = 'mánudegi'
+                if x[2] == 5:
+                    dagur = 'þriðjudegi'
+                if x[2] == 9:
+                    dagur = 'fimmtudegi'
+                if x[2] == 13:
+                    dagur = 'föstudegi'
+                print('nemandi nr: ', x[0], 'er í gati á milli 10:05 og 14:00 á', dagur)
+
 
 else:
     print('No solution found')
