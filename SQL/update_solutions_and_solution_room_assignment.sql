@@ -9,4 +9,4 @@ CREATE TABLE solution_room_assignment (
   room_id int references rooms(id),
   student_count int,
   primary key(id)
-)
+);
