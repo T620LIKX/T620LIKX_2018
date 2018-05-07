@@ -102,6 +102,9 @@ P4 = 50
 P5 = 40
 P6 = 10
 
+NotAllowed = set()
+FixedCourses = set()
+
 x = m.addVars(C, T, vtype = GRB.BINARY, name = 'x')
 
 z1 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z1')
@@ -121,55 +124,94 @@ Overlap1 = m.addConstrs((x[(c1,t)] + x[(c2,t)] <= 1 + z1[(c1,c2)] for t in range
                                                                   for c2 in range(C)
                                                                   if c1 != c2), name = 'Overlap1') 
 
-Overlap2a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z2[(c1,c2)] for t in range(1, T-1, 2) 
+Overlap2a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z2[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16,18]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C) 
-                                                                    #if t%2 == 1
                                                                     if c1 != c2), name = 'Overlap2a')
-Overlap2b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z2[(c1,c2)] for t in range(1, T-1, 2) 
+Overlap2b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z2[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16,18]
                                                                     for c2 in range(C) 
                                                                     for c1 in range(C)
-                                                                    #if t%2 == 1
                                                                     if c1 != c2), name = 'Overlap2b') 
 
-Overlap3a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z3[(c1,c2)] for t in range(0, T-2, 2)
+Overlap3a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z3[(c1,c2)] for t in [1,3,5,7,11,13,15,17]
                                                                    for c1 in range(C)
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap3a') 
-Overlap3b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z3[(c1,c2)] for t in range(0, T-2, 2)
+Overlap3b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z3[(c1,c2)] for t in  [1,3,5,7,11,13,15,17]
                                                                    for c1 in range(C)
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap3b') 
 
-Overlap4a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z4[(c1,c2)] for t in range(0, T-2, 2) 
+Overlap4a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z4[(c1,c2)] for t in  [1,3,5,7,11,13,15,17]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap4a') 
-Overlap4b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z4[(c1,c2)] for t in range(0, T-2, 2) 
+Overlap4b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z4[(c1,c2)] for t in  [1,3,5,7,11,13,15,17]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap4b')
 
-Overlap5a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z5[(c1,c2)] for t in range(1, T-2, 2) 
+Overlap5a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z5[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap5a')
-Overlap5b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z5[(c1,c2)] for t in range(1, T-2, 2) 
+Overlap5b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z5[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap5b')
 
-Overlap6a = m.addConstrs((x[(c1,t)] + x[(c2,t+3)] <= 1 + z6[(c1,c2)] for t in range(1, T-3, 2) 
+Overlap6a = m.addConstrs((x[(c1,t)] + x[(c2,t+3)] <= 1 + z6[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap6a') 
-Overlap6b = m.addConstrs((x[(c2,t)] + x[(c1,t+3)] <= 1 + z6[(c1,c2)] for t in range(1, T-3, 2) 
+Overlap6b = m.addConstrs((x[(c2,t)] + x[(c1,t+3)] <= 1 + z6[(c1,c2)] for t in [0,2,4,6,8,10,12,14,16]
                                                                     for c1 in range(C) 
                                                                     for c2 in range(C)
                                                                     if c1 != c2), name = 'Overlap6b') 
 
 ClassR = m.addConstrs((quicksum(x[(c,t)] for c in range(C)) <= S for t in range(T)), name = 'ClassR')
 
+MaxNemfjoldi = m.addConstrs((quicksum(x[(c,t)]*thecoursedata[c][1] for c in range(C)) <= N for t in range(T)), name = 'MaxNemfjoldi')
+NotAllow = m.addConstrs((quicksum(x[(c,t)] for c in NotAllowed) == 0 for t in range(T)), name = 'NotAllow')
+FixCourse = m.addConstrs((quicksum(x[(c,t)] for c in FixedCourses) == 0 for t in range(T)), name = 'FixCourse')
 
-goal1 = quicksum(P1*z1[(c1,c2)]*thecoursedata[c1,c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
-goal2 = quicksum(y[c][r] for c in range(C) for r in range(S))
+#MaxOneComputer = m.addConstrs((quicksum(x[(c,t)] for c in ) <= 1 for t in range(T)), name = 'MaxOneComputer')
+
+
+goal1 = quicksum(P1*z1[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal2 = quicksum(P2*z2[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal3 = quicksum(P3*z3[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal4 = quicksum(P4*z4[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal5 = quicksum(P5*z5[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal6 = quicksum(P6*z6[(c1,c2)]*conflict_matrix[c1][c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+
+obj = m.setObjective(goal1 + goal2 + goal3 + goal4 + goal5 + goal6, GRB.MINIMIZE)
+
+m.optimize()
+
+print('Obj: %g' % m.objVal)
+
+
+#--------------- Solution to database ---------------------
+
+
+solution_id = 1
+select_max_solution_id = "select max(solution_id) from solutions;"
+cursor.execute(select_max_solution_id)
+max_solution_id = cursor.fetchall()
+if max_solution_id[0][0] is not None:
+    solution_id = 1 + max_solution_id[0][0]
+
+insert_solution = "insert into solutions (solution_id, solution_type, course_id, timeslot) values ({},'examtable',{},{});"
+
+variables = m.getVars()
+for v in variables:
+    if v.x > 0.99 and v.varName[0] == 'x':
+      course_id = int(v.varName.split('[')[1].split(']')[0].split(',')[0])
+      database_course_id = id_glpk_to_database[ course_id ]
+      timeslot = int(v.varname.split('[')[1].split(']')[0].split(',')[1])
+      #print('Course {} is in timeslot {}'.format(database_course_id, timeslot))
+      cursor.execute(insert_solution.format(solution_id, database_course_id, timeslot))
+
+conn.commit()
+conn.close()
