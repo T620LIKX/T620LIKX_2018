@@ -86,7 +86,7 @@ for i in thedata:
 
 m = Model("Examtable")
 
-m.setParam(GRB.Param.TimeLimit, 150.0)
+m.setParam(GRB.Param.TimeLimit, 1000.0)
 
 T = 20
 C = len(thecoursedata)
@@ -172,8 +172,8 @@ Overlap6b = m.addConstrs((x[(c2,t)] + x[(c1,t+3)] <= 1 + z6[(c1,c2)] for t in [0
 ClassR = m.addConstrs((quicksum(x[(c,t)] for c in range(C)) <= S for t in range(T)), name = 'ClassR')
 
 MaxNemfjoldi = m.addConstrs((quicksum(x[(c,t)]*thecoursedata[c][1] for c in range(C)) <= N for t in range(T)), name = 'MaxNemfjoldi')
-NotAllow = m.addConstrs((quicksum(x[(c,t)] for c in NotAllowed) == 0 for t in range(T)), name = 'NotAllow')
-FixCourse = m.addConstrs((quicksum(x[(c,t)] for c in FixedCourses) == 0 for t in range(T)), name = 'FixCourse')
+NotAllow = m.addConstrs((x[(c,t)] == 0 for c in NotAllowed for t in range(T)), name = 'NotAllow')
+FixCourse = m.addConstrs((x[(c,t)] == 0 for c in FixedCourses for t in range(T)), name = 'FixCourse')
 
 #MaxOneComputer = m.addConstrs((quicksum(x[(c,t)] for c in ) <= 1 for t in range(T)), name = 'MaxOneComputer')
 
@@ -193,7 +193,6 @@ print('Obj: %g' % m.objVal)
 
 
 #--------------- Solution to database ---------------------
-
 
 solution_id = 1
 select_max_solution_id = "select max(solution_id) from solutions;"

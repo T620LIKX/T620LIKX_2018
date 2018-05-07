@@ -97,7 +97,13 @@ Course100Limit = 2
 Course80Limit = 8
 Course60Limit = 14
 
-FixedCourses = set()
+fixedcoursesfile = open('examtable_fixedcourses_rooms.txt')
+fixedcourses =fixedcoursesfile.readlines()
+fixedcoursesfile.close()
+
+notallowedfile = open('examtable_notallowed_rooms.txt')
+notallowed = notallowedfile.readlines()
+notallowedfile.close()
 
 LargeCourse100 = tuplelist([3, 4, 5, 6, 7, 8, 10, 11, 13, 17])
 LargeCourse80 = tuplelist([3, 4, 5, 6, 7, 8, 10, 11, 13, 17])
@@ -135,8 +141,6 @@ obj = m.setObjective(goal1 + goal2, GRB.MINIMIZE)
 
 m.optimize()
 
-#m.write('solutionLikan.lp')
-#m.write('solutionLikan.sol')
 
 #for v in m.getVars():
 #        print('%s %g' % (v.varName, v.x))
