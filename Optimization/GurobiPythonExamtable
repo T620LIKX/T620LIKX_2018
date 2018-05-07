@@ -1,0 +1,175 @@
+from gurobipy import *
+import pickle
+import psycopg2
+
+semestercode = 20171
+departments = '3,4'
+
+def connect_to_database(host, dbname, username, pw):
+    conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
+
+    try:
+        conn = psycopg2.connect(conn_string)
+    except psycopg2.OperationalError as e:
+        print('Connection failed!')
+        print('Error message:', e)
+        exit()
+
+    cursor = conn.cursor()
+
+    return cursor, conn
+
+
+def calculate_conflict_penalty(c):
+    if c <= 10:
+        return c
+    elif c <= 20:
+        return c*2
+    elif c <= 40:
+        return c*3
+    elif c <= 100:
+        return c*4
+    elif c > 100:
+        return c*5 
+
+
+cursor, conn = connect_to_database('localhost', 'likanx','postgres', 'postgres')
+
+select_course_ids = """select c.id, count(e.student_id), c.computer_exam
+from courses c, enrollment e
+where semester_type = {} and department_id in ({})
+and c.id = e.course_id
+group by c.id
+order by id;"""
+
+select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id) 
+from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id as course2
+      from enrollment e1, enrollment e2, courses c1, courses c2
+      where e1.student_id = e2.student_id
+      and e1.course_id < e2.course_id
+      and e1.course_id = c1.id and e2.course_id = c2.id
+      and c1.semester_type = c2.semester_type
+      and c2.semester_type = {}
+      and c1.department_id in ({}) and c2.department_id in ({})) tmp
+group by tmp.course1, tmp.course2
+order by tmp.course1, tmp.course2;"""
+
+
+
+cursor.execute( select_course_ids.format(semestercode, departments))
+thecoursedata = cursor.fetchall()
+
+cursor.execute( select_conflicts.format(semestercode, departments, departments) )
+thedata = cursor.fetchall()
+
+id_database_to_glpk = {}
+id_glpk_to_database = {}
+
+counter = 0
+for i in thecoursedata:
+    id_database_to_glpk[i[0]] = counter
+    id_glpk_to_database[counter] = i[0]
+    counter = counter + 1
+
+conflict_matrix = [[0 for _ in range(1+len(thecoursedata))] for _ in range(1+len(thecoursedata))]
+
+for i in thedata:
+    course_1 = id_database_to_glpk[ i[0] ]
+    course_2 = id_database_to_glpk[ i[1] ]
+    conflict_penalty = calculate_conflict_penalty(i[2])
+    conflict_matrix[course_1][course_2] = conflict_penalty
+    conflict_matrix[course_2][course_1] = conflict_penalty
+
+
+#----------- Gurobi Examtable model --------------------
+
+
+m = Model("Examtable")
+
+m.setParam(GRB.Param.TimeLimit, 150.0)
+
+T = 20
+C = len(thecoursedata)
+S = 100
+N = 829
+A = 1
+B = 1
+
+P1 = 1000
+P2 = 500
+P3 = 100
+P4 = 50
+P5 = 40
+P6 = 10
+
+x = m.addVars(C, T, vtype = GRB.BINARY, name = 'x')
+
+z1 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z1')
+z2 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z2')
+z3 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z3')
+z4 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z4')
+z5 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z5')
+z6 = m.addVars(C, C, vtype = GRB.BINARY, name = 'z6')
+z_hat = m.addVars(C, C, vtype = GRB.BINARY, name = 'z_hat')
+
+
+
+Exams = m.addConstrs((quicksum(x[(c,t)] for t in range(T)) == 1 for c in range(C)), name = 'Exams') 
+
+Overlap1 = m.addConstrs((x[(c1,t)] + x[(c2,t)] <= 1 + z1[(c1,c2)] for t in range(T) 
+                                                                  for c1 in range(C) 
+                                                                  for c2 in range(C)
+                                                                  if c1 != c2), name = 'Overlap1') 
+
+Overlap2a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z2[(c1,c2)] for t in range(1, T-1, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C) 
+                                                                    #if t%2 == 1
+                                                                    if c1 != c2), name = 'Overlap2a')
+Overlap2b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z2[(c1,c2)] for t in range(1, T-1, 2) 
+                                                                    for c2 in range(C) 
+                                                                    for c1 in range(C)
+                                                                    #if t%2 == 1
+                                                                    if c1 != c2), name = 'Overlap2b') 
+
+Overlap3a = m.addConstrs((x[(c1,t)] + x[(c2,t+1)] <= 1 + z3[(c1,c2)] for t in range(0, T-2, 2)
+                                                                   for c1 in range(C)
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap3a') 
+Overlap3b = m.addConstrs((x[(c2,t)] + x[(c1,t+1)] <= 1 + z3[(c1,c2)] for t in range(0, T-2, 2)
+                                                                   for c1 in range(C)
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap3b') 
+
+Overlap4a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z4[(c1,c2)] for t in range(0, T-2, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap4a') 
+Overlap4b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z4[(c1,c2)] for t in range(0, T-2, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap4b')
+
+Overlap5a = m.addConstrs((x[(c1,t)] + x[(c2,t+2)] <= 1 + z5[(c1,c2)] for t in range(1, T-2, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap5a')
+Overlap5b = m.addConstrs((x[(c2,t)] + x[(c1,t+2)] <= 1 + z5[(c1,c2)] for t in range(1, T-2, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap5b')
+
+Overlap6a = m.addConstrs((x[(c1,t)] + x[(c2,t+3)] <= 1 + z6[(c1,c2)] for t in range(1, T-3, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap6a') 
+Overlap6b = m.addConstrs((x[(c2,t)] + x[(c1,t+3)] <= 1 + z6[(c1,c2)] for t in range(1, T-3, 2) 
+                                                                    for c1 in range(C) 
+                                                                    for c2 in range(C)
+                                                                    if c1 != c2), name = 'Overlap6b') 
+
+ClassR = m.addConstrs((quicksum(x[(c,t)] for c in range(C)) <= S for t in range(T)), name = 'ClassR')
+
+
+goal1 = quicksum(P1*z1[(c1,c2)]*thecoursedata[c1,c2] for c1 in range(C) for c2 in range(C) if c1 != c2)
+goal2 = quicksum(y[c][r] for c in range(C) for r in range(S))
