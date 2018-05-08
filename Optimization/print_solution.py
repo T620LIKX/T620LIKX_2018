@@ -112,5 +112,3 @@ if len(departments) > 1:
         print_solution(thetable, slots, days)
         print('')
         print('')
-
-
