@@ -331,7 +331,6 @@ elif stundatafla == True:
     where s1.solution_id = {}
     and s2.solution_id = s1.solution_id
     and e1.student_id = e2.student_id
-    and e1.course_id < e2.course_id
     and e1.course_id = s1.course_id and e2.course_id = s2.course_id
     and e1.course_id = c1.id and e2.course_id = c2.id
     and s1.timeslot + 3 = s2.timeslot
