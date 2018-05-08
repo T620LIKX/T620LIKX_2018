@@ -1,8 +1,8 @@
 import pickle
 import psycopg2
 
-semestercode = 20171
-departments = '3,4,5'
+semestercode = 20184
+departments = '4,5,6'
 
 def connect_to_database(host, dbname, username, pw):
     conn_string = "host='{}' dbname='{}' user='{}' password='{}'".format(host, dbname, username, pw)
@@ -29,6 +29,7 @@ select_course_ids = """select c.id, count(e.student_id), c.computer_exam
 from courses c, enrollment e
 where semester_type = {} and department_id in ({})
 and c.id = e.course_id
+and c.final_exam = true
 group by c.id
 order by id;"""
 
@@ -40,7 +41,9 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and e1.course_id = c1.id and e2.course_id = c2.id
       and c1.semester_type = c2.semester_type
       and c2.semester_type = {}
-      and c1.department_id in ({}) and c2.department_id in ({})) tmp
+      and c1.department_id in ({}) and c2.department_id in ({})
+      and c1.final_exam = true
+      and c2.final_exam = true) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
 
