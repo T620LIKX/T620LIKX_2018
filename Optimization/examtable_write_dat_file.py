@@ -33,7 +33,7 @@ and c.final_exam = true
 group by c.id
 order by id;"""
 
-select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id) 
+select_conflicts = """select tmp.course1, tmp.course2, count(tmp.student_id)
 from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id as course2
       from enrollment e1, enrollment e2, courses c1, courses c2
       where e1.student_id = e2.student_id
@@ -130,8 +130,8 @@ for x in fixedcourses:
     for i in thecoursedata:
         if i[0] == course_id:
             includethiscourse = True
-        if includethiscourse:
-            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+    if includethiscourse:
+        f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
 f.write(';\n')
 
 f.write('set NotAllowed :=\n')
