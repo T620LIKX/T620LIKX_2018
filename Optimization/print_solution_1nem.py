@@ -91,16 +91,17 @@ cursor.execute(select_students.format(solution_id))
 thestudents = cursor.fetchall()
 
 for i in thestudents:
-    cursor.execute(select_solution.format(solution_id, i[0]))
-    thesolutions = cursor.fetchall()
+    if int(i[0]) == 1265:
+        cursor.execute(select_solution.format(solution_id, i[0]))
+        thesolutions = cursor.fetchall()
 
-    if len(thesolutions) == 0:
-        print('No solution found')
-        exit()
+        if len(thesolutions) == 0:
+            print('No solution found')
+            exit()
 
-    print('Student: {}'.format(i[0]))
-    thetable, slots, days = create_table(thesolutions)
-    print_solution(thetable, slots, days)
-    print('')
+        print('Student: {}'.format(i[0]))
+        thetable, slots, days = create_table(thesolutions)
+        print_solution(thetable, slots, days)
+        print('')
 
 conn.close()
