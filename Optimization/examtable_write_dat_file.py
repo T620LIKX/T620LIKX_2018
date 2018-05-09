@@ -30,6 +30,7 @@ from courses c, enrollment e
 where semester_type = {} and department_id in ({})
 and c.id = e.course_id
 and c.final_exam = true
+and c.graduate_course = false
 group by c.id
 order by id;"""
 
@@ -43,7 +44,9 @@ from (select e1.student_id as student_id, e1.course_id as course1, e2.course_id 
       and c2.semester_type = {}
       and c1.department_id in ({}) and c2.department_id in ({})
       and c1.final_exam = true
-      and c2.final_exam = true) tmp
+      and c2.final_exam = true
+      and c1.graduate_course = false
+      and c2.graduate_course = false) tmp
 group by tmp.course1, tmp.course2
 order by tmp.course1, tmp.course2;"""
 
@@ -123,6 +126,8 @@ for i in thecoursedata:
 f.write(';\n')
 
 f.write('set FixedCourses :=\n')
+thefixes = set()
+
 for x in fixedcourses:
     course_id = int(x.split()[0])
     timeslot = x.split()[1]
@@ -130,8 +135,11 @@ for x in fixedcourses:
     for i in thecoursedata:
         if i[0] == course_id:
             includethiscourse = True
-        if includethiscourse:
-            f.write('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+    if includethiscourse:
+      thefixes.add('{} {}\n'.format(id_database_to_glpk[course_id], timeslot))
+
+for x in thefixes:
+  f.write(x)
 f.write(';\n')
 
 f.write('set NotAllowed :=\n')
