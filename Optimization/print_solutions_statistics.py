@@ -134,7 +134,7 @@ if proftafla == True:
     total_students = """ select count(student_id) from
       (SELECT DISTINCT e.student_id
     FROM enrollment e, courses c, solutions s
-    WHERE s.solution_id = 2
+    WHERE s.solution_id = {}
     AND e.course_id = s.course_id
     AND e.course_id = c.id
     GROUP BY e.student_id
@@ -302,7 +302,7 @@ if proftafla == True:
             print('Student ID: ', x[0], '- áfangar sem skarast:' ,x[1] , 'og', x[3], '- tímaslott:', x[2], 'og', x[4])
 
 elif stundatafla == True:
-    
+
     student_skorun = """select e1.student_id, c1.course_code, c2.course_code, s1.timeslot
     from enrollment e1, enrollment e2, courses c1, courses c2, solutions s1, solutions s2
     where s1.solution_id = {}
