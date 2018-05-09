@@ -11,7 +11,7 @@ param P2 >= 0 integer;
 param P3 >= 0 integer;
 param P4 >= 0 integer;
 param P5 >= 0 integer;
-param P6 >= 0 integer; 
+param P6 >= 0 integer;
 
 set FixedCourses within {c in 1..C, t in 1..T};
 set NotAllowed within {c in 1..C, t in 1..T};
@@ -60,6 +60,6 @@ s.t. ClassR{t in 1..T}: sum{c in 1..C} x[c,t] <= S;
 
 s.t. MaxNemfjoldi{t in 1..T}: sum{c in 1..C} x[c,t] * FjoldiNemenda[c] <= N;
 
-s.t. MaxOneComputer{t in 1..T}: sum{c in ComputerExam} x[c,t] <= 1;
+#s.t. MaxOneComputer{t in 1..T}: sum{c in ComputerExam} x[c,t] <= 1;
 
 end;
